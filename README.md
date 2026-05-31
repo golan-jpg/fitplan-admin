@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FitPlan Admin
 
-## Getting Started
+FitPlan Admin הוא לוח ניהול Hebrew-first ו-RTL עבור מאמנים ותזונאים. זהו דשבורד דמו שנבנה ב-Next.js + TypeScript + Tailwind, עם Mock Data כברירת מחדל ועם שכבת הכנה ל-API אמיתי בעתיד.
 
-First, run the development server:
+## מה יש במערכת
+
+- דשבורד סקירה ראשי.
+- ניהול משתמשים.
+- ניהול תוכניות אימון ותזונה.
+- ספריית תרגילים ומתכונים.
+- מעקב התקדמות ואנליטיקות.
+- התחברות דמו עם role-based UI.
+
+## התקנה
+
+```bash
+npm install
+```
+
+## קובצי סביבה
+
+העתיקו את [.env.example](.env.example) ל-`.env.local` ועדכנו ערכים לפי הצורך.
+
+ברירת המחדל היא Mock, כך שהאפליקציה עובדת גם בלי Backend.
+
+## הרצה מקומית
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+האפליקציה תרוץ בדרך כלל ב-[http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## משתמשי דמו
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `admin@fitplan.co.il / 123456`
+- `coach@fitplan.co.il / 123456`
+- `nutritionist@fitplan.co.il / 123456`
 
-## Learn More
+## Role-Based UI
 
-To learn more about Next.js, take a look at the following resources:
+המערכת מציגה תפריטים ומסכים לפי התפקיד של המשתמש המחובר. זה כולל Sidebar, ניתוב, והרשאות תצוגה בסיסיות עבור Admin, Coach ו-Nutritionist.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Mock Data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+השירותים משתמשים ב-Mock Data כברירת מחדל. זה מאפשר לעבוד על ה-UI וה-UX בלי תלות בשרת אמיתי.
 
-## Deploy on Vercel
+## USE_MOCK_API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `USE_MOCK_API=true` - מצב ברירת מחדל. השירותים משתמשים ב-Mock Data.
+- `USE_MOCK_API=false` - המערכת תתחיל לנסות להשתמש ב-API דרך `httpClient` עבור Users בלבד, בלי לשנות את המסכים.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## מעבר עתידי ל-API אמיתי
+
+כדי לעבור לשרת אמיתי בעתיד, צריך:
+
+1. להגדיר `NEXT_PUBLIC_USE_MOCK_API=false`.
+2. להגדיר `NEXT_PUBLIC_API_BASE_URL` לכתובת ה-backend.
+3. לספק endpoints שתואמים לחוזים תחת `src/contracts/`.
+4. להחזיר response envelope אחיד עם `data`, `meta`, `error`.
+
+## פקודות שימושיות
+
+```bash
+npm run lint
+npm run build
+```
+
+## הערה טכנית
+
+הפרויקט לא בנוי כ-Monorepo, לא Mobile, ולא מחובר עדיין ל-Backend אמיתי. המטרה כרגע היא לשמור על דשבורד יציב, מוכן להרחבה עתידית בלי לשבור את חוויית הדמו.
