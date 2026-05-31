@@ -1,4 +1,3 @@
-import { workoutPlans as workoutPlansMock } from "@/data/mockData";
 import { request } from "@/lib/httpClient";
 import { PlanStatus, WorkoutPlan } from "@/types";
 import {
@@ -33,5 +32,3 @@ export async function updateWorkoutPlanStatus(
 
   return response.data;
 }
-
-void workoutPlansMock;
