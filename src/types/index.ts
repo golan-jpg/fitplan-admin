@@ -27,6 +27,9 @@ export type WorkoutPlan = {
   assignedUsers: number;
   durationWeeks: number;
   updatedAt: string;
+  planGoal?: string;
+  workoutsPerWeek?: number;
+  description?: string;
 };
 
 export type NutritionPlan = {
@@ -37,15 +40,23 @@ export type NutritionPlan = {
   assignedUsers: number;
   caloriesTarget: number;
   updatedAt: string;
+  proteinTarget?: number;
+  mealsPerDay?: number;
+  dietaryNotes?: string;
+  description?: string;
 };
 
 export type Exercise = {
   id: string;
   name: string;
-  category: "strength" | "cardio" | "mobility";
+  category: "strength" | "cardio" | "mobility" | "core";
   level: "beginner" | "intermediate" | "advanced";
   equipment: string;
   status: EntityStatus;
+  muscleGroup?: string;
+  description?: string;
+  instructions?: string;
+  safetyNotes?: string;
 };
 
 export type Recipe = {
@@ -55,6 +66,12 @@ export type Recipe = {
   calories: number;
   protein: number;
   status: EntityStatus;
+  carbs?: number;
+  fat?: number;
+  prepTime?: number;
+  tags?: string[];
+  ingredients?: string;
+  instructions?: string;
 };
 
 export type ProgressReport = {

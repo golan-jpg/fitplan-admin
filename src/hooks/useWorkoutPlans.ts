@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PlanStatus, WorkoutPlan } from "@/types";
-import { getWorkoutPlans, updateWorkoutPlanStatus } from "@/services/workoutPlansService";
+import {
+  createWorkoutPlan,
+  CreateWorkoutPlanPayload,
+  getWorkoutPlans,
+  updateWorkoutPlan,
+  UpdateWorkoutPlanPayload,
+  updateWorkoutPlanStatus,
+} from "@/services/workoutPlansService";
 
 export function useWorkoutPlans() {
   const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>([]);
@@ -26,6 +33,20 @@ export function useWorkoutPlans() {
 
   const actions = useMemo(
     () => ({
+      createWorkoutPlan: async (payload: CreateWorkoutPlanPayload) => {
+        const created = await createWorkoutPlan(workoutPlans, payload);
+        setWorkoutPlans((prev) => [created, ...prev]);
+        return created;
+      },
+      updateWorkoutPlan: async (planId: string, payload: UpdateWorkoutPlanPayload) => {
+        const updated = await updateWorkoutPlan(workoutPlans, planId, payload);
+        if (!updated) {
+          return null;
+        }
+
+        setWorkoutPlans((prev) => prev.map((plan) => (plan.id === planId ? updated : plan)));
+        return updated;
+      },
       updateWorkoutPlanStatus: async (planId: string, status: PlanStatus) => {
         const updated = await updateWorkoutPlanStatus(workoutPlans, planId, status);
         if (!updated) {

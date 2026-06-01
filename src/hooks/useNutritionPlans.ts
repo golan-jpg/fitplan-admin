@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { NutritionPlan, PlanStatus } from "@/types";
-import { getNutritionPlans, updateNutritionPlanStatus } from "@/services/nutritionPlansService";
+import {
+  createNutritionPlan,
+  CreateNutritionPlanPayload,
+  getNutritionPlans,
+  updateNutritionPlan,
+  UpdateNutritionPlanPayload,
+  updateNutritionPlanStatus,
+} from "@/services/nutritionPlansService";
 
 export function useNutritionPlans() {
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>([]);
@@ -26,6 +33,20 @@ export function useNutritionPlans() {
 
   const actions = useMemo(
     () => ({
+      createNutritionPlan: async (payload: CreateNutritionPlanPayload) => {
+        const created = await createNutritionPlan(nutritionPlans, payload);
+        setNutritionPlans((prev) => [created, ...prev]);
+        return created;
+      },
+      updateNutritionPlan: async (planId: string, payload: UpdateNutritionPlanPayload) => {
+        const updated = await updateNutritionPlan(nutritionPlans, planId, payload);
+        if (!updated) {
+          return null;
+        }
+
+        setNutritionPlans((prev) => prev.map((plan) => (plan.id === planId ? updated : plan)));
+        return updated;
+      },
       updateNutritionPlanStatus: async (planId: string, status: PlanStatus) => {
         const updated = await updateNutritionPlanStatus(nutritionPlans, planId, status);
         if (!updated) {
