@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { AppModal } from "@/components/ui/AppModal";
@@ -16,29 +16,29 @@ import { useAuditLogContext } from "@/context/AuditLogContext";
 import { PlanStatus, WorkoutPlan } from "@/types";
 
 const statusTabs = [
-  { label: "×”×›×•×œ", value: "all" },
-  { label: "×¤×¢×™×œ", value: "active" },
-  { label: "×˜×™×•×˜×”", value: "draft" },
-  { label: "××¨×›×™×•×Ÿ", value: "archived" },
+  { label: "הכול", value: "all" },
+  { label: "פעיל", value: "active" },
+  { label: "טיוטה", value: "draft" },
+  { label: "ארכיון", value: "archived" },
 ];
 
 const levelTabs = [
-  { label: "×›×œ ×”×¨×ž×•×ª", value: "all" },
-  { label: "×ž×ª×—×™×œ×™×", value: "beginner" },
-  { label: "×‘×™× ×•× ×™", value: "intermediate" },
-  { label: "×ž×ª×§×“×", value: "advanced" },
+  { label: "כל הרמות", value: "all" },
+  { label: "מתחילים", value: "beginner" },
+  { label: "בינוני", value: "intermediate" },
+  { label: "מתקדם", value: "advanced" },
 ];
 
 const levelLabel: Record<WorkoutPlan["level"], string> = {
-  beginner: "×ž×ª×—×™×œ×™×",
-  intermediate: "×‘×™× ×•× ×™",
-  advanced: "×ž×ª×§×“×",
+  beginner: "מתחילים",
+  intermediate: "בינוני",
+  advanced: "מתקדם",
 };
 
 const statusLabel: Record<PlanStatus, string> = {
-  active: "×¤×¢×™×œ",
-  draft: "×˜×™×•×˜×”",
-  archived: "××¨×›×™×•×Ÿ",
+  active: "פעיל",
+  draft: "טיוטה",
+  archived: "ארכיון",
 };
 
 type WorkoutPlanFormState = {
@@ -78,16 +78,13 @@ export default function WorkoutPlansPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [levelFilter, setLevelFilter] = useState("all");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formState, setFormState] = useState<WorkoutPlanFormState>(EMPTY_PLAN);
-
   const [archiveTargetId, setArchiveTargetId] = useState<string | null>(null);
   const [isArchiving, setIsArchiving] = useState(false);
-
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const rows = useMemo(() => {
@@ -126,8 +123,8 @@ export default function WorkoutPlansPage() {
 
   function savePlan() {
     if (!formState.title.trim()) {
-      setErrorMessage("×™×© ×œ×ž×œ× ×©× ×ª×•×›× ×™×ª.");
-      setToast({ type: "error", message: "×œ× × ×™×ª×Ÿ ×œ×©×ž×•×¨: ×—×¡×¨ ×©× ×ª×•×›× ×™×ª." });
+      setErrorMessage("יש למלא שם תכנית.");
+      setToast({ type: "error", message: "לא ניתן לשמור: חסר שם תכנית." });
       return;
     }
 
@@ -161,7 +158,7 @@ export default function WorkoutPlansPage() {
             });
           }
         }
-        setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ ×¢×•×“×›× ×” ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "תכנית האימון עודכנה בהצלחה." });
       } else {
         const created = await createWorkoutPlan(formState);
         if (session) {
@@ -176,7 +173,7 @@ export default function WorkoutPlansPage() {
             description: `נוצרה תכנית אימון חדשה: ${formState.title}.`,
           });
         }
-        setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ × ×•×¦×¨×” ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "תכנית האימון נוצרה בהצלחה." });
       }
       setIsSaving(false);
       setIsModalOpen(false);
@@ -187,6 +184,7 @@ export default function WorkoutPlansPage() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
     const targetPlan = workoutPlans.find((plan) => plan.id === archiveTargetId);
+
     setTimeout(async () => {
       await updateWorkoutPlanStatus(archiveTargetId, "archived");
       if (session && targetPlan) {
@@ -203,7 +201,7 @@ export default function WorkoutPlansPage() {
       }
       setIsArchiving(false);
       setArchiveTargetId(null);
-      setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ ×”×•×¢×‘×¨×” ×œ××¨×›×™×•×Ÿ." });
+      setToast({ type: "success", message: "תכנית האימון הועברה לארכיון." });
     }, 600);
   }
 
@@ -214,16 +212,16 @@ export default function WorkoutPlansPage() {
   }
 
   const columns: DataTableColumn<WorkoutPlan>[] = [
-    { key: "title", header: "×©× ×ª×•×›× ×™×ª", render: (row) => <span className="font-semibold">{row.title}</span> },
-    { key: "level", header: "×¨×ž×”", render: (row) => levelLabel[row.level] },
-    { key: "planGoal", header: "×ž×˜×¨×”", render: (row) => row.planGoal ?? "â€”" },
-    { key: "users", header: "×ž×©×ª×ž×©×™×", render: (row) => row.assignedUsers },
-    { key: "duration", header: "×ž×©×š", render: (row) => `${row.durationWeeks} ×©×‘×•×¢×•×ª` },
-    { key: "updated", header: "×¢×•×“×›×Ÿ", render: (row) => row.updatedAt },
-    { key: "status", header: "×¡×˜×˜×•×¡", render: (row) => <StatusBadge status={row.status} /> },
+    { key: "title", header: "שם תכנית", render: (row) => <span className="font-semibold">{row.title}</span> },
+    { key: "level", header: "רמה", render: (row) => levelLabel[row.level] },
+    { key: "planGoal", header: "מטרה", render: (row) => row.planGoal ?? "—" },
+    { key: "users", header: "משתמשים", render: (row) => row.assignedUsers },
+    { key: "duration", header: "משך", render: (row) => `${row.durationWeeks} שבועות` },
+    { key: "updated", header: "עודכן", render: (row) => row.updatedAt },
+    { key: "status", header: "סטטוס", render: (row) => <StatusBadge status={row.status} /> },
     {
       key: "actions",
-      header: "×¤×¢×•×œ×•×ª",
+      header: "פעולות",
       render: (row) =>
         canEdit ? (
           <div className="flex items-center gap-2">
@@ -232,7 +230,7 @@ export default function WorkoutPlansPage() {
               onClick={() => openEditModal(row)}
               className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
-              ×¢×¨×™×›×”
+              עריכה
             </button>
             {row.status !== "archived" && (
               <button
@@ -240,7 +238,7 @@ export default function WorkoutPlansPage() {
                 onClick={() => setArchiveTargetId(row.id)}
                 className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
               >
-                ××¨×›×•×‘
+                ארכוב
               </button>
             )}
             {row.status === "archived" && (
@@ -270,39 +268,39 @@ export default function WorkoutPlansPage() {
                         description: `סטטוס תכנית האימון "${row.title}" שונה מארכיון לטיוטה.`,
                       });
                     }
-                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." });
+                    setToast({ type: "success", message: "התכנית שוחזרה לטיוטה." });
                   })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >
-                ×©×—×–×•×¨
+                שחזור
               </button>
             )}
           </div>
         ) : (
-          <span className="text-xs text-slate-400">××™×Ÿ ×”×¨×©××”</span>
+          <span className="text-xs text-slate-400">אין הרשאה</span>
         ),
     },
   ];
 
   return (
     <div className="space-y-5">
-      <Breadcrumbs items={[{ label: "×“×©×‘×•×¨×“", href: "/" }, { label: "×ª×•×›× ×™×•×ª ××™×ž×•×Ÿ" }]} />
+      <Breadcrumbs items={[{ label: "דשבורד", href: "/" }, { label: "תוכניות אימון" }]} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageTitle title="× ×™×”×•×œ ×ª×•×›× ×™×•×ª ××™×ž×•×Ÿ" subtitle="×—×™×¤×•×©, ×¡×™× ×•×Ÿ ×•× ×™×”×•×œ ×§×˜×œ×•×’ ×ª×•×›× ×™×•×ª ××™×ž×•×Ÿ" />
+        <PageTitle title="ניהול תוכניות אימון" subtitle="חיפוש, סינון וניהול קטלוג תוכניות אימון" />
         {canEdit && (
           <button
             type="button"
             onClick={openAddModal}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            + ×™×¦×™×¨×ª ×ª×•×›× ×™×ª
+            + יצירת תכנית
           </button>
         )}
       </div>
 
       <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4">
-        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="×—×™×¤×•×© ×œ×¤×™ ×©× ×ª×•×›× ×™×ª" />
+        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="חיפוש לפי שם תכנית" />
         <div className="flex flex-wrap items-center gap-3">
           <FilterTabs tabs={statusTabs} activeValue={statusFilter} onChange={setStatusFilter} />
           <FilterTabs tabs={levelTabs} activeValue={levelFilter} onChange={setLevelFilter} />
@@ -314,21 +312,20 @@ export default function WorkoutPlansPage() {
         columns={columns}
         isLoading={isWorkoutPlansLoading}
         emptyState={{
-          emoji: "ðŸ‹ï¸",
-          title: "××™×Ÿ ×ª×•×›× ×™×•×ª ××™×ž×•×Ÿ ×œ×”×¦×’×”",
-          description: "×œ× × ×ž×¦××• ×ª×•×›× ×™×•×ª ×©×¢×•×ž×“×•×ª ×‘×§×¨×™×˜×¨×™×•× ×™× ×©× ×‘×—×¨×•.",
-          actionLabel: "× ×™×§×•×™ ×¡×™× ×•× ×™×",
+          emoji: "🏋️",
+          title: "אין תוכניות אימון להצגה",
+          description: "לא נמצאו תוכניות שעומדות בקריטריונים שנבחרו.",
+          actionLabel: "ניקוי סינונים",
           onAction: clearFilters,
         }}
       />
 
       {error ? <p className="text-sm font-semibold text-rose-700">{error}</p> : null}
 
-      {/* ×ž×•×“×œ ×™×¦×™×¨×”/×¢×¨×™×›×” */}
       <AppModal
         isOpen={isModalOpen}
-        title={editingPlanId ? "×¢×¨×™×›×ª ×ª×•×›× ×™×ª ××™×ž×•×Ÿ" : "×™×¦×™×¨×ª ×ª×•×›× ×™×ª ××™×ž×•×Ÿ"}
-        subtitle="×©×™× ×•×™×™× × ×©×ž×¨×™× ×‘×–×™×›×¨×•×Ÿ ×‘×œ×‘×“"
+        title={editingPlanId ? "עריכת תכנית אימון" : "יצירת תכנית אימון"}
+        subtitle="שינויים נשמרים בזיכרון בלבד"
         onClose={() => !isSaving && setIsModalOpen(false)}
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -338,7 +335,7 @@ export default function WorkoutPlansPage() {
               disabled={isSaving}
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              ×‘×™×˜×•×œ
+              ביטול
             </button>
             <button
               type="button"
@@ -346,54 +343,50 @@ export default function WorkoutPlansPage() {
               disabled={isSaving}
               className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              {isSaving ? "×©×•×ž×¨..." : "×©×ž×™×¨×”"}
+              {isSaving ? "שומר..." : "שמירה"}
             </button>
           </div>
         }
       >
         <div className="grid gap-3 md:grid-cols-2">
-          {/* ×©× ×ª×•×›× ×™×ª */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×©× ×ª×•×›× ×™×ª *</span>
+            <span className="font-semibold text-slate-700">שם תכנית *</span>
             <input
               value={formState.title}
               onChange={(e) => setFormState((prev) => ({ ...prev, title: e.target.value }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×œ×“×•×’×ž×”: ×ª×•×›× ×™×ª ×›×•×— ×œ×ž×ª×—×™×œ×™×"
+              placeholder="לדוגמה: תוכנית כוח למתחילים"
             />
           </label>
 
-          {/* ×ž×˜×¨×” */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×ž×˜×¨×”</span>
+            <span className="font-semibold text-slate-700">מטרה</span>
             <input
               value={formState.planGoal}
               onChange={(e) => setFormState((prev) => ({ ...prev, planGoal: e.target.value }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×œ×“×•×’×ž×”: ×‘× ×™×™×ª ×ž×¡×ª ×©×¨×™×¨, ×—×™×˜×•×‘, ×©×™×¤×•×¨ ×¡×™×‘×•×œ×ª"
+              placeholder="לדוגמה: בניית מסת שריר, חיטוב, שיפור סיבולת"
             />
           </label>
 
-          {/* ×¨×ž×ª ×§×•×©×™ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¨×ž×ª ×§×•×©×™</span>
+            <span className="font-semibold text-slate-700">רמת קושי</span>
             <select
               value={formState.level}
               onChange={(e) => setFormState((prev) => ({ ...prev, level: e.target.value as WorkoutPlan["level"] }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
             >
-              <option value="beginner">×ž×ª×—×™×œ×™×</option>
-              <option value="intermediate">×‘×™× ×•× ×™</option>
-              <option value="advanced">×ž×ª×§×“×</option>
+              <option value="beginner">מתחילים</option>
+              <option value="intermediate">בינוני</option>
+              <option value="advanced">מתקדם</option>
             </select>
           </label>
 
-          {/* ×¡×˜×˜×•×¡ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¡×˜×˜×•×¡</span>
+            <span className="font-semibold text-slate-700">סטטוס</span>
             <select
               value={formState.status}
               onChange={(e) => setFormState((prev) => ({ ...prev, status: e.target.value as PlanStatus }))}
@@ -406,9 +399,8 @@ export default function WorkoutPlansPage() {
             </select>
           </label>
 
-          {/* ×ž×©×š ×‘×©×‘×•×¢×•×ª */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×ž×©×š (×©×‘×•×¢×•×ª)</span>
+            <span className="font-semibold text-slate-700">משך (שבועות)</span>
             <input
               type="number"
               value={formState.durationWeeks}
@@ -420,9 +412,8 @@ export default function WorkoutPlansPage() {
             />
           </label>
 
-          {/* ××™×ž×•× ×™× ×‘×©×‘×•×¢ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">××™×ž×•× ×™× ×‘×©×‘×•×¢</span>
+            <span className="font-semibold text-slate-700">אימונים בשבוע</span>
             <input
               type="number"
               value={formState.workoutsPerWeek}
@@ -434,28 +425,26 @@ export default function WorkoutPlansPage() {
             />
           </label>
 
-          {/* ×ª×™××•×¨ */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×ª×™××•×¨</span>
+            <span className="font-semibold text-slate-700">תיאור</span>
             <textarea
               value={formState.description}
               onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
               rows={3}
               className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×ª×™××•×¨ ×›×œ×œ×™ ×©×œ ×”×ª×•×›× ×™×ª, ×ž×” ×›×•×œ×œ×ª ×•×œ×ž×™ ×ž×ª××™×ž×”"
+              placeholder="תיאור כללי של התכנית, מה כוללת ולמי מתאימה"
             />
           </label>
         </div>
         {errorMessage ? <p className="mt-3 text-sm font-semibold text-rose-700">{errorMessage}</p> : null}
       </AppModal>
 
-      {/* ×“×™××œ×•×’ ××¨×›×•×‘ */}
       <ConfirmDialog
         isOpen={Boolean(archiveTargetId)}
-        title="××¨×›×•×‘ ×ª×•×›× ×™×ª ××™×ž×•×Ÿ"
-        message="×”×× ×œ××¨×›×‘ ××ª ×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ? ×”×¡×˜×˜×•×¡ ×™×©×ª× ×” ×œ××¨×›×™×•×Ÿ. × ×™×ª×Ÿ ×œ×©×—×–×¨ ×‘×”×ž×©×š."
-        confirmLabel="××¨×›×•×‘"
+        title="ארכוב תכנית אימון"
+        message="האם לארכב את תכנית האימון? הסטטוס ישתנה לארכיון. ניתן לשחזר בהמשך."
+        confirmLabel="ארכוב"
         variant="danger"
         isLoading={isArchiving}
         onCancel={() => setArchiveTargetId(null)}

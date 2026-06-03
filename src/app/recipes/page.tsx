@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { AppModal } from "@/components/ui/AppModal";
@@ -16,26 +16,26 @@ import { useAuditLogContext } from "@/context/AuditLogContext";
 import { Recipe } from "@/types";
 
 const mealTabs = [
-  { label: "×”×›×•×œ", value: "all" },
-  { label: "×‘×•×§×¨", value: "breakfast" },
-  { label: "×¦×”×¨×™×™×", value: "lunch" },
-  { label: "×¢×¨×‘", value: "dinner" },
-  { label: "×‘×™× ×™×™×", value: "snack" },
+  { label: "הכול", value: "all" },
+  { label: "בוקר", value: "breakfast" },
+  { label: "צהריים", value: "lunch" },
+  { label: "ערב", value: "dinner" },
+  { label: "ביניים", value: "snack" },
 ];
 
 const mealLabel: Record<Recipe["mealType"], string> = {
-  breakfast: "××¨×•×—×ª ×‘×•×§×¨",
-  lunch: "××¨×•×—×ª ×¦×”×¨×™×™×",
-  dinner: "××¨×•×—×ª ×¢×¨×‘",
-  snack: "××¨×•×—×ª ×‘×™× ×™×™×",
+  breakfast: "ארוחת בוקר",
+  lunch: "ארוחת צהריים",
+  dinner: "ארוחת ערב",
+  snack: "ארוחת ביניים",
 };
 
 const AVAILABLE_TAGS = [
-  { value: "kosher", label: "×›×©×¨" },
-  { value: "vegan", label: "×˜×‘×¢×•× ×™" },
-  { value: "vegetarian", label: "×¦×ž×—×•× ×™" },
-  { value: "glutenFree", label: "×œ×œ× ×’×œ×•×˜×Ÿ" },
-  { value: "lactoseFree", label: "×œ×œ× ×œ×§×˜×•×–" },
+  { value: "kosher", label: "כשר" },
+  { value: "vegan", label: "טבעוני" },
+  { value: "vegetarian", label: "צמחוני" },
+  { value: "glutenFree", label: "ללא גלוטן" },
+  { value: "lactoseFree", label: "ללא לקטוז" },
 ];
 
 const EMPTY_RECIPE: Omit<Recipe, "id"> = {
@@ -125,8 +125,8 @@ export default function RecipesPage() {
 
   function saveRecipe() {
     if (!formState.name.trim()) {
-      setErrorMessage("×™×© ×œ×ž×œ× ×©× ×ž×ª×›×•×Ÿ.");
-      setToast({ type: "error", message: "×œ× × ×™×ª×Ÿ ×œ×©×ž×•×¨: ×—×¡×¨ ×©× ×ž×ª×›×•×Ÿ." });
+      setErrorMessage("יש למלא שם מתכון.");
+      setToast({ type: "error", message: "לא ניתן לשמור: חסר שם מתכון." });
       return;
     }
 
@@ -146,7 +146,7 @@ export default function RecipesPage() {
             description: `עודכן מתכון: ${formState.name}.`,
           });
         }
-        setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×¢×•×“×›×Ÿ ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "המתכון עודכן בהצלחה." });
       } else {
         const created = await createRecipe(formState);
         if (session) {
@@ -161,7 +161,7 @@ export default function RecipesPage() {
             description: `נוסף מתכון חדש: ${formState.name}.`,
           });
         }
-        setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ × ×•×¡×£ ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "המתכון נוסף בהצלחה." });
       }
       setIsSaving(false);
       setIsModalOpen(false);
@@ -188,7 +188,7 @@ export default function RecipesPage() {
       }
       setIsArchiving(false);
       setArchiveTargetId(null);
-      setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×”×•×¢×‘×¨ ×œ××¨×›×™×•×Ÿ." });
+      setToast({ type: "success", message: "המתכון הועבר לארכיון." });
     }, 600);
   }
 
@@ -198,16 +198,16 @@ export default function RecipesPage() {
   }
 
   const columns: DataTableColumn<Recipe>[] = [
-    { key: "name", header: "×©× ×ž×ª×›×•×Ÿ", render: (row) => <span className="font-semibold">{row.name}</span> },
-    { key: "meal", header: "×¡×•×’ ××¨×•×—×”", render: (row) => mealLabel[row.mealType] },
-    { key: "calories", header: "×§×œ×•×¨×™×•×ª", render: (row) => row.calories },
-    { key: "protein", header: "×—×œ×‘×•×Ÿ", render: (row) => `${row.protein}×’` },
+    { key: "name", header: "שם מתכון", render: (row) => <span className="font-semibold">{row.name}</span> },
+    { key: "meal", header: "סוג ארוחה", render: (row) => mealLabel[row.mealType] },
+    { key: "calories", header: "קלוריות", render: (row) => row.calories },
+    { key: "protein", header: "חלבון", render: (row) => `${row.protein}ג` },
     {
       key: "tags",
-      header: "×ª×’×™×•×ª",
+      header: "תגיות",
       render: (row) => {
         const recipeTags = row.tags ?? [];
-        if (recipeTags.length === 0) return <span className="text-slate-400">â€”</span>;
+        if (recipeTags.length === 0) return <span className="text-slate-400">—</span>;
         return (
           <div className="flex flex-wrap gap-1">
             {recipeTags.map((tag) => {
@@ -222,10 +222,10 @@ export default function RecipesPage() {
         );
       },
     },
-    { key: "status", header: "×¡×˜×˜×•×¡", render: (row) => <StatusBadge status={row.status} /> },
+    { key: "status", header: "סטטוס", render: (row) => <StatusBadge status={row.status} /> },
     {
       key: "actions",
-      header: "×¤×¢×•×œ×•×ª",
+      header: "פעולות",
       render: (row) =>
         canEdit ? (
           <div className="flex items-center gap-2">
@@ -234,7 +234,7 @@ export default function RecipesPage() {
               onClick={() => openEditModal(row)}
               className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
-              ×¢×¨×™×›×”
+              עריכה
             </button>
             {row.status === "active" ? (
               <button
@@ -242,7 +242,7 @@ export default function RecipesPage() {
                 onClick={() => setArchiveTargetId(row.id)}
                 className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
               >
-                ××¨×›×•×‘
+                ארכוב
               </button>
             ) : (
               <button
@@ -261,38 +261,38 @@ export default function RecipesPage() {
                         description: `מתכון שוחזר מארכיון: ${row.name}.`,
                       });
                     }
-                    setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×”×•×¤×¢×œ ×ž×—×“×©." });
+                    setToast({ type: "success", message: "המתכון שוחזר בהצלחה." });
                   })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >
-                ×”×¤×¢×œ×”
+                שחזור
               </button>
             )}
           </div>
         ) : (
-          <span className="text-xs text-slate-400">××™×Ÿ ×”×¨×©××”</span>
+          <span className="text-xs text-slate-400">אין הרשאה</span>
         ),
     },
   ];
 
   return (
     <div className="space-y-5">
-      <Breadcrumbs items={[{ label: "×“×©×‘×•×¨×“", href: "/" }, { label: "×ž×ª×›×•× ×™×" }]} />
+      <Breadcrumbs items={[{ label: "דשבורד", href: "/" }, { label: "מתכונים" }]} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageTitle title="×ž××’×¨ ××¨×•×—×•×ª ×•×ž×ª×›×•× ×™×" subtitle="× ×™×”×•×œ ×ž×ª×›×•× ×™× ×œ×¤×™ ×¡×•×’ ××¨×•×—×” ×•×¢×¨×›×™× ×ª×–×•× ×ª×™×™×" />
+        <PageTitle title="מאגר מתכונים" subtitle="ניהול מתכונים, רכיבים וערכים תזונתיים" />
         {canEdit && (
           <button
             type="button"
             onClick={openAddModal}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            + ×”×•×¡×¤×ª ×ž×ª×›×•×Ÿ
+            + הוספת מתכון
           </button>
         )}
       </div>
       <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[1fr_auto] md:items-center">
-        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="×—×™×¤×•×© ×œ×¤×™ ×©× ×ž×ª×›×•×Ÿ ××• ×¡×•×’ ××¨×•×—×”" />
+        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="חיפוש מתכון" />
         <FilterTabs tabs={mealTabs} activeValue={mealFilter} onChange={setMealFilter} />
       </div>
       <DataTable
@@ -300,10 +300,10 @@ export default function RecipesPage() {
         columns={columns}
         isLoading={isRecipesLoading}
         emptyState={{
-          emoji: "ðŸ½ï¸",
-          title: "×œ× × ×ž×¦××• ×ž×ª×›×•× ×™×",
-          description: "×œ× × ×ž×¦××• ×ž×ª×›×•× ×™× ×œ×¤×™ ×¡×•×’ ×”××¨×•×—×” ××• ×˜×§×¡×˜ ×”×—×™×¤×•×© ×©×”×•×’×“×¨.",
-          actionLabel: "× ×™×§×•×™ ×¡×™× ×•× ×™×",
+          emoji: "🍽️",
+          title: "אין מתכונים להצגה",
+          description: "לא נמצאו מתכונים לפי סוג הארוחה או טקסט החיפוש שהוגדר.",
+          actionLabel: "ניקוי סינונים",
           onAction: clearFilters,
         }}
       />
@@ -312,8 +312,8 @@ export default function RecipesPage() {
 
       <AppModal
         isOpen={isModalOpen}
-        title={editingRecipeId ? "×¢×¨×™×›×ª ×ž×ª×›×•×Ÿ" : "×”×•×¡×¤×ª ×ž×ª×›×•×Ÿ"}
-        subtitle="×©×™× ×•×™×™× × ×©×ž×¨×™× ×‘×–×™×›×¨×•×Ÿ ×‘×œ×‘×“"
+        title={editingRecipeId ? "עריכת מתכון" : "הוספת מתכון"}
+        subtitle="שינויים נשמרים בזיכרון בלבד"
         onClose={() => !isSaving && setIsModalOpen(false)}
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -323,7 +323,7 @@ export default function RecipesPage() {
               disabled={isSaving}
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              ×‘×™×˜×•×œ
+              ביטול
             </button>
             <button
               type="button"
@@ -331,57 +331,53 @@ export default function RecipesPage() {
               disabled={isSaving}
               className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              {isSaving ? "×©×•×ž×¨..." : "×©×ž×™×¨×”"}
+              {isSaving ? "שומר..." : "שמירה"}
             </button>
           </div>
         }
       >
         <div className="grid gap-3 md:grid-cols-2">
-          {/* ×©× ×ž×ª×›×•×Ÿ */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×©× ×ž×ª×›×•×Ÿ *</span>
+            <span className="font-semibold text-slate-700">שם מתכון *</span>
             <input
               value={formState.name}
               onChange={(event) => setFormState((prev) => ({ ...prev, name: event.target.value }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×œ×“×•×’×ž×”: ×—×–×” ×¢×•×£ ×¢× ×§×™× ×•××”"
+              placeholder="לדוגמה: חזה עוף עם קינואה"
             />
           </label>
 
-          {/* ×¡×•×’ ××¨×•×—×” */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¡×•×’ ××¨×•×—×”</span>
+            <span className="font-semibold text-slate-700">סוג ארוחה</span>
             <select
               value={formState.mealType}
               onChange={(event) => setFormState((prev) => ({ ...prev, mealType: event.target.value as Recipe["mealType"] }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
             >
-              <option value="breakfast">××¨×•×—×ª ×‘×•×§×¨</option>
-              <option value="lunch">××¨×•×—×ª ×¦×”×¨×™×™×</option>
-              <option value="dinner">××¨×•×—×ª ×¢×¨×‘</option>
-              <option value="snack">××¨×•×—×ª ×‘×™× ×™×™×</option>
+              <option value="breakfast">ארוחת בוקר</option>
+              <option value="lunch">ארוחת צהריים</option>
+              <option value="dinner">ארוחת ערב</option>
+              <option value="snack">ארוחת ביניים</option>
             </select>
           </label>
 
-          {/* ×¡×˜×˜×•×¡ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¡×˜×˜×•×¡</span>
+            <span className="font-semibold text-slate-700">סטטוס</span>
             <select
               value={formState.status}
               onChange={(event) => setFormState((prev) => ({ ...prev, status: event.target.value as Recipe["status"] }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
             >
-              <option value="active">×¤×¢×™×œ</option>
-              <option value="inactive">×œ× ×¤×¢×™×œ</option>
+              <option value="active">פעיל</option>
+              <option value="inactive">לא פעיל</option>
             </select>
           </label>
 
-          {/* ×¢×¨×›×™× ×ª×–×•× ×ª×™×™× */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×§×œ×•×¨×™×•×ª</span>
+            <span className="font-semibold text-slate-700">קלוריות</span>
             <input
               type="number"
               value={formState.calories}
@@ -392,7 +388,7 @@ export default function RecipesPage() {
             />
           </label>
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×—×œ×‘×•×Ÿ (×’×¨×)</span>
+            <span className="font-semibold text-slate-700">חלבון (גרם)</span>
             <input
               type="number"
               value={formState.protein}
@@ -403,7 +399,7 @@ export default function RecipesPage() {
             />
           </label>
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¤×—×ž×™×ž×•×ª (×’×¨×)</span>
+            <span className="font-semibold text-slate-700">פחמימות (גרם)</span>
             <input
               type="number"
               value={formState.carbs ?? 0}
@@ -414,7 +410,7 @@ export default function RecipesPage() {
             />
           </label>
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×©×•×ž×Ÿ (×’×¨×)</span>
+            <span className="font-semibold text-slate-700">שומן (גרם)</span>
             <input
               type="number"
               value={formState.fat ?? 0}
@@ -425,7 +421,7 @@ export default function RecipesPage() {
             />
           </label>
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×–×ž×Ÿ ×”×›× ×” (×“×§×•×ª)</span>
+            <span className="font-semibold text-slate-700">זמן הכנה (דקות)</span>
             <input
               type="number"
               value={formState.prepTime ?? 0}
@@ -436,9 +432,8 @@ export default function RecipesPage() {
             />
           </label>
 
-          {/* ×ª×’×™×•×ª */}
           <div className="space-y-2 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×ª×’×™×•×ª</span>
+            <span className="font-semibold text-slate-700">תגיות</span>
             <div className="flex flex-wrap gap-2">
               {AVAILABLE_TAGS.map((tag) => {
                 const isSelected = (formState.tags ?? []).includes(tag.value);
@@ -461,29 +456,27 @@ export default function RecipesPage() {
             </div>
           </div>
 
-          {/* ×¨×›×™×‘×™× */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×¨×›×™×‘×™×</span>
+            <span className="font-semibold text-slate-700">רכיבים</span>
             <textarea
               value={formState.ingredients ?? ""}
               onChange={(event) => setFormState((prev) => ({ ...prev, ingredients: event.target.value }))}
               rows={3}
               className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×¤×¨×˜ ××ª ×”×¨×›×™×‘×™× ×•××ª ×”×›×ž×•×™×•×ª"
+              placeholder="פרט את הרכיבים ואת הכמויות"
             />
           </label>
 
-          {/* ×”×•×¨××•×ª ×”×›× ×” */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×”×•×¨××•×ª ×”×›× ×”</span>
+            <span className="font-semibold text-slate-700">הוראות הכנה</span>
             <textarea
               value={formState.instructions ?? ""}
               onChange={(event) => setFormState((prev) => ({ ...prev, instructions: event.target.value }))}
               rows={3}
               className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×¤×¨×˜ ××ª ×©×œ×‘×™ ×”×”×›× ×”"
+              placeholder="פרט את שלבי ההכנה"
             />
           </label>
         </div>
@@ -492,9 +485,9 @@ export default function RecipesPage() {
 
       <ConfirmDialog
         isOpen={Boolean(archiveTargetId)}
-        title="××¨×›×•×‘ ×ž×ª×›×•×Ÿ"
-        message="×”×× ×œ××¨×›×‘ ××ª ×”×ž×ª×›×•×Ÿ? ×”×•× ×™×•×¢×‘×¨ ×œ×¡×˜×˜×•×¡ ×œ× ×¤×¢×™×œ ×•×œ× ×™×•×¦×’ ×œ×ž×©×ª×ž×©×™×."
-        confirmLabel="××¨×›×•×‘"
+        title="ארכוב מתכון"
+        message="האם לארכב את המתכון? הוא יועבר לסטטוס לא פעיל ולא יוצג למשתמשים."
+        confirmLabel="ארכוב"
         variant="danger"
         isLoading={isArchiving}
         onCancel={() => setArchiveTargetId(null)}

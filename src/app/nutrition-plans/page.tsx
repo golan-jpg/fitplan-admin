@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { AppModal } from "@/components/ui/AppModal";
@@ -16,29 +16,29 @@ import { useAuditLogContext } from "@/context/AuditLogContext";
 import { NutritionPlan, PlanStatus } from "@/types";
 
 const statusTabs = [
-  { label: "×”×›×•×œ", value: "all" },
-  { label: "×¤×¢×™×œ", value: "active" },
-  { label: "×˜×™×•×˜×”", value: "draft" },
-  { label: "××¨×›×™×•×Ÿ", value: "archived" },
+  { label: "הכול", value: "all" },
+  { label: "פעיל", value: "active" },
+  { label: "טיוטה", value: "draft" },
+  { label: "ארכיון", value: "archived" },
 ];
 
 const goalTabs = [
-  { label: "×›×œ ×”×ž×˜×¨×•×ª", value: "all" },
-  { label: "×™×¨×™×“×” ×‘×©×•×ž×Ÿ", value: "fat_loss" },
-  { label: "×¢×œ×™×™×” ×‘×ž×¡×”", value: "muscle_gain" },
-  { label: "×©×ž×™×¨×”", value: "maintenance" },
+  { label: "כל המטרות", value: "all" },
+  { label: "ירידה בשומן", value: "fat_loss" },
+  { label: "עלייה במסה", value: "muscle_gain" },
+  { label: "שמירה", value: "maintenance" },
 ];
 
 const goalLabel: Record<NutritionPlan["goal"], string> = {
-  fat_loss: "×™×¨×™×“×” ×‘×©×•×ž×Ÿ",
-  muscle_gain: "×¢×œ×™×™×” ×‘×ž×¡×ª ×©×¨×™×¨",
-  maintenance: "×©×ž×™×¨×” ×¢×œ ×ž×©×§×œ",
+  fat_loss: "ירידה בשומן",
+  muscle_gain: "עלייה במסת שריר",
+  maintenance: "שמירה על משקל",
 };
 
 const statusLabel: Record<PlanStatus, string> = {
-  active: "×¤×¢×™×œ",
-  draft: "×˜×™×•×˜×”",
-  archived: "××¨×›×™×•×Ÿ",
+  active: "פעיל",
+  draft: "טיוטה",
+  archived: "ארכיון",
 };
 
 type NutritionPlanFormState = {
@@ -80,16 +80,13 @@ export default function NutritionPlansPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [goalFilter, setGoalFilter] = useState("all");
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formState, setFormState] = useState<NutritionPlanFormState>(EMPTY_PLAN);
-
   const [archiveTargetId, setArchiveTargetId] = useState<string | null>(null);
   const [isArchiving, setIsArchiving] = useState(false);
-
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const rows = useMemo(() => {
@@ -129,8 +126,8 @@ export default function NutritionPlansPage() {
 
   function savePlan() {
     if (!formState.title.trim()) {
-      setErrorMessage("×™×© ×œ×ž×œ× ×©× ×ª×•×›× ×™×ª.");
-      setToast({ type: "error", message: "×œ× × ×™×ª×Ÿ ×œ×©×ž×•×¨: ×—×¡×¨ ×©× ×ª×•×›× ×™×ª." });
+      setErrorMessage("יש למלא שם תכנית.");
+      setToast({ type: "error", message: "לא ניתן לשמור: חסר שם תכנית." });
       return;
     }
 
@@ -164,7 +161,7 @@ export default function NutritionPlansPage() {
             });
           }
         }
-        setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” ×¢×•×“×›× ×” ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "תכנית התזונה עודכנה בהצלחה." });
       } else {
         const created = await createNutritionPlan(formState);
         if (session) {
@@ -179,8 +176,9 @@ export default function NutritionPlansPage() {
             description: `נוצרה תכנית תזונה חדשה: ${formState.title}.`,
           });
         }
-        setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” × ×•×¦×¨×” ×‘×”×¦×œ×—×”." });
+        setToast({ type: "success", message: "תכנית התזונה נוצרה בהצלחה." });
       }
+
       setIsSaving(false);
       setIsModalOpen(false);
     }, 650);
@@ -190,6 +188,7 @@ export default function NutritionPlansPage() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
     const targetPlan = nutritionPlans.find((plan) => plan.id === archiveTargetId);
+
     setTimeout(async () => {
       await updateNutritionPlanStatus(archiveTargetId, "archived");
       if (session && targetPlan) {
@@ -206,7 +205,7 @@ export default function NutritionPlansPage() {
       }
       setIsArchiving(false);
       setArchiveTargetId(null);
-      setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” ×”×•×¢×‘×¨×” ×œ××¨×›×™×•×Ÿ." });
+      setToast({ type: "success", message: "תכנית התזונה הועברה לארכיון." });
     }, 600);
   }
 
@@ -217,17 +216,17 @@ export default function NutritionPlansPage() {
   }
 
   const columns: DataTableColumn<NutritionPlan>[] = [
-    { key: "title", header: "×©× ×ª×•×›× ×™×ª", render: (row) => <span className="font-semibold">{row.title}</span> },
-    { key: "goal", header: "×ž×˜×¨×”", render: (row) => goalLabel[row.goal] },
-    { key: "calories", header: `×™×¢×“ ×§×§"×œ`, render: (row) => row.caloriesTarget },
-    { key: "protein", header: "×™×¢×“ ×—×œ×‘×•×Ÿ", render: (row) => row.proteinTarget ? `${row.proteinTarget}×’` : "â€”" },
-    { key: "meals", header: "××¨×•×—×•×ª/×™×•×", render: (row) => row.mealsPerDay ?? "â€”" },
-    { key: "users", header: "×ž×©×ª×ž×©×™×", render: (row) => row.assignedUsers },
-    { key: "updated", header: "×¢×•×“×›×Ÿ", render: (row) => row.updatedAt },
-    { key: "status", header: "×¡×˜×˜×•×¡", render: (row) => <StatusBadge status={row.status} /> },
+    { key: "title", header: "שם תכנית", render: (row) => <span className="font-semibold">{row.title}</span> },
+    { key: "goal", header: "מטרה", render: (row) => goalLabel[row.goal] },
+    { key: "calories", header: 'יעד קק"ל', render: (row) => row.caloriesTarget },
+    { key: "protein", header: "יעד חלבון", render: (row) => (row.proteinTarget ? `${row.proteinTarget}ג` : "—") },
+    { key: "meals", header: "ארוחות/יום", render: (row) => row.mealsPerDay ?? "—" },
+    { key: "users", header: "משתמשים", render: (row) => row.assignedUsers },
+    { key: "updated", header: "עודכן", render: (row) => row.updatedAt },
+    { key: "status", header: "סטטוס", render: (row) => <StatusBadge status={row.status} /> },
     {
       key: "actions",
-      header: "×¤×¢×•×œ×•×ª",
+      header: "פעולות",
       render: (row) =>
         canEdit ? (
           <div className="flex items-center gap-2">
@@ -236,7 +235,7 @@ export default function NutritionPlansPage() {
               onClick={() => openEditModal(row)}
               className="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
-              ×¢×¨×™×›×”
+              עריכה
             </button>
             {row.status !== "archived" && (
               <button
@@ -244,7 +243,7 @@ export default function NutritionPlansPage() {
                 onClick={() => setArchiveTargetId(row.id)}
                 className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
               >
-                ××¨×›×•×‘
+                ארכוב
               </button>
             )}
             {row.status === "archived" && (
@@ -274,39 +273,39 @@ export default function NutritionPlansPage() {
                         description: `סטטוס תכנית התזונה "${row.title}" שונה מארכיון לטיוטה.`,
                       });
                     }
-                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." });
+                    setToast({ type: "success", message: "התכנית שוחזרה לטיוטה." });
                   })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >
-                ×©×—×–×•×¨
+                שחזור
               </button>
             )}
           </div>
         ) : (
-          <span className="text-xs text-slate-400">××™×Ÿ ×”×¨×©××”</span>
+          <span className="text-xs text-slate-400">אין הרשאה</span>
         ),
     },
   ];
 
   return (
     <div className="space-y-5">
-      <Breadcrumbs items={[{ label: "×“×©×‘×•×¨×“", href: "/" }, { label: "×ª×•×›× ×™×•×ª ×ª×–×•× ×”" }]} />
+      <Breadcrumbs items={[{ label: "דשבורד", href: "/" }, { label: "תוכניות תזונה" }]} />
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageTitle title="× ×™×”×•×œ ×ª×•×›× ×™×•×ª ×ª×–×•× ×”" subtitle="×ª×¦×•×’×” ×•× ×™×”×•×œ ×©×œ ×ž×¡×’×¨×•×ª ×ª×–×•× ×” ×œ×ž×©×ª×ž×©×™×" />
+        <PageTitle title="ניהול תוכניות תזונה" subtitle="תצוגה וניהול של מסגרות תזונה למשתמשים" />
         {canEdit && (
           <button
             type="button"
             onClick={openAddModal}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            + ×™×¦×™×¨×ª ×ª×•×›× ×™×ª
+            + יצירת תכנית
           </button>
         )}
       </div>
 
       <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4">
-        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="×—×™×¤×•×© ×œ×¤×™ ×©× ×ª×•×›× ×™×ª" />
+        <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="חיפוש לפי שם תכנית" />
         <div className="flex flex-wrap items-center gap-3">
           <FilterTabs tabs={statusTabs} activeValue={statusFilter} onChange={setStatusFilter} />
           <FilterTabs tabs={goalTabs} activeValue={goalFilter} onChange={setGoalFilter} />
@@ -318,21 +317,20 @@ export default function NutritionPlansPage() {
         columns={columns}
         isLoading={isNutritionPlansLoading}
         emptyState={{
-          emoji: "ðŸ¥—",
-          title: "××™×Ÿ ×ª×•×›× ×™×•×ª ×ª×–×•× ×” ×œ×”×¦×’×”",
-          description: "×œ× × ×ž×¦××• ×ª×•×›× ×™×•×ª ×œ×¤×™ ×”×ž×˜×¨×”, ×”×¡×˜×˜×•×¡ ××• ×”×—×™×¤×•×© ×©×‘×—×¨×ª.",
-          actionLabel: "× ×™×§×•×™ ×¡×™× ×•× ×™×",
+          emoji: "🥗",
+          title: "אין תוכניות תזונה להצגה",
+          description: "לא נמצאו תוכניות לפי המטרה, הסטטוס או החיפוש שבחרת.",
+          actionLabel: "ניקוי סינונים",
           onAction: clearFilters,
         }}
       />
 
       {error ? <p className="text-sm font-semibold text-rose-700">{error}</p> : null}
 
-      {/* ×ž×•×“×œ ×™×¦×™×¨×”/×¢×¨×™×›×” */}
       <AppModal
         isOpen={isModalOpen}
-        title={editingPlanId ? "×¢×¨×™×›×ª ×ª×•×›× ×™×ª ×ª×–×•× ×”" : "×™×¦×™×¨×ª ×ª×•×›× ×™×ª ×ª×–×•× ×”"}
-        subtitle="×©×™× ×•×™×™× × ×©×ž×¨×™× ×‘×–×™×›×¨×•×Ÿ ×‘×œ×‘×“"
+        title={editingPlanId ? "עריכת תכנית תזונה" : "יצירת תכנית תזונה"}
+        subtitle="שינויים נשמרים בזיכרון בלבד"
         onClose={() => !isSaving && setIsModalOpen(false)}
         footer={
           <div className="flex items-center justify-end gap-2">
@@ -342,7 +340,7 @@ export default function NutritionPlansPage() {
               disabled={isSaving}
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              ×‘×™×˜×•×œ
+              ביטול
             </button>
             <button
               type="button"
@@ -350,42 +348,39 @@ export default function NutritionPlansPage() {
               disabled={isSaving}
               className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
-              {isSaving ? "×©×•×ž×¨..." : "×©×ž×™×¨×”"}
+              {isSaving ? "שומר..." : "שמירה"}
             </button>
           </div>
         }
       >
         <div className="grid gap-3 md:grid-cols-2">
-          {/* ×©× ×ª×•×›× ×™×ª */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×©× ×ª×•×›× ×™×ª *</span>
+            <span className="font-semibold text-slate-700">שם תכנית *</span>
             <input
               value={formState.title}
               onChange={(e) => setFormState((prev) => ({ ...prev, title: e.target.value }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×œ×“×•×’×ž×”: ×™×¨×™×“×” ×‘××—×•×– ×©×•×ž×Ÿ 1800 ×§×§×´×œ"
+              placeholder='לדוגמה: ירידה באחוז שומן 1800 קק"ל'
             />
           </label>
 
-          {/* ×ž×˜×¨×” */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×ž×˜×¨×”</span>
+            <span className="font-semibold text-slate-700">מטרה</span>
             <select
               value={formState.goal}
               onChange={(e) => setFormState((prev) => ({ ...prev, goal: e.target.value as NutritionPlan["goal"] }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
             >
-              <option value="fat_loss">×™×¨×™×“×” ×‘×©×•×ž×Ÿ</option>
-              <option value="muscle_gain">×¢×œ×™×™×” ×‘×ž×¡×ª ×©×¨×™×¨</option>
-              <option value="maintenance">×©×ž×™×¨×” ×¢×œ ×ž×©×§×œ</option>
+              <option value="fat_loss">ירידה בשומן</option>
+              <option value="muscle_gain">עלייה במסת שריר</option>
+              <option value="maintenance">שמירה על משקל</option>
             </select>
           </label>
 
-          {/* ×¡×˜×˜×•×¡ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×¡×˜×˜×•×¡</span>
+            <span className="font-semibold text-slate-700">סטטוס</span>
             <select
               value={formState.status}
               onChange={(e) => setFormState((prev) => ({ ...prev, status: e.target.value as PlanStatus }))}
@@ -398,9 +393,8 @@ export default function NutritionPlansPage() {
             </select>
           </label>
 
-          {/* ×§×œ×•×¨×™×•×ª ×™×¢×“ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×§×œ×•×¨×™×•×ª ×™×¢×“</span>
+            <span className="font-semibold text-slate-700">קלוריות יעד</span>
             <input
               type="number"
               value={formState.caloriesTarget}
@@ -412,9 +406,8 @@ export default function NutritionPlansPage() {
             />
           </label>
 
-          {/* ×—×œ×‘×•×Ÿ ×™×¢×“ */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">×—×œ×‘×•×Ÿ ×™×¢×“ (×’×¨×)</span>
+            <span className="font-semibold text-slate-700">חלבון יעד (גרם)</span>
             <input
               type="number"
               value={formState.proteinTarget}
@@ -425,9 +418,8 @@ export default function NutritionPlansPage() {
             />
           </label>
 
-          {/* ×ž×¡×¤×¨ ××¨×•×—×•×ª ×‘×™×•× */}
           <label className="space-y-1 text-sm">
-            <span className="font-semibold text-slate-700">××¨×•×—×•×ª ×‘×™×•×</span>
+            <span className="font-semibold text-slate-700">ארוחות ביום</span>
             <input
               type="number"
               value={formState.mealsPerDay}
@@ -439,40 +431,37 @@ export default function NutritionPlansPage() {
             />
           </label>
 
-          {/* ×”×ª××ž×•×ª ×ª×–×•× ×” */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×”×ª××ž×•×ª ×ª×–×•× ×”</span>
+            <span className="font-semibold text-slate-700">התאמות תזונה</span>
             <input
               value={formState.dietaryNotes}
               onChange={(e) => setFormState((prev) => ({ ...prev, dietaryNotes: e.target.value }))}
               className="w-full rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×œ×“×•×’×ž×”: ×œ×œ× ×’×œ×•×˜×Ÿ, ×˜×‘×¢×•× ×™, ×›×©×¨"
+              placeholder="לדוגמה: ללא גלוטן, טבעוני, כשר"
             />
           </label>
 
-          {/* ×ª×™××•×¨ */}
           <label className="space-y-1 text-sm md:col-span-2">
-            <span className="font-semibold text-slate-700">×ª×™××•×¨</span>
+            <span className="font-semibold text-slate-700">תיאור</span>
             <textarea
               value={formState.description}
               onChange={(e) => setFormState((prev) => ({ ...prev, description: e.target.value }))}
               rows={3}
               className="w-full resize-none rounded-xl border border-slate-300 px-3 py-2"
               disabled={isSaving}
-              placeholder="×ª×™××•×¨ ×›×œ×œ×™ ×©×œ ×”×ª×•×›× ×™×ª, ×ž×” ×›×•×œ×œ×ª ×•×œ×ž×™ ×ž×ª××™×ž×”"
+              placeholder="תיאור כללי של התכנית, מה כוללת ולמי מתאימה"
             />
           </label>
         </div>
         {errorMessage ? <p className="mt-3 text-sm font-semibold text-rose-700">{errorMessage}</p> : null}
       </AppModal>
 
-      {/* ×“×™××œ×•×’ ××¨×›×•×‘ */}
       <ConfirmDialog
         isOpen={Boolean(archiveTargetId)}
-        title="××¨×›×•×‘ ×ª×•×›× ×™×ª ×ª×–×•× ×”"
-        message="×”×× ×œ××¨×›×‘ ××ª ×ª×•×›× ×™×ª ×”×ª×–×•× ×”? ×”×¡×˜×˜×•×¡ ×™×©×ª× ×” ×œ××¨×›×™×•×Ÿ. × ×™×ª×Ÿ ×œ×©×—×–×¨ ×‘×”×ž×©×š."
-        confirmLabel="××¨×›×•×‘"
+        title="ארכוב תכנית תזונה"
+        message="האם לארכב את תכנית התזונה? הסטטוס ישתנה לארכיון. ניתן לשחזר בהמשך."
+        confirmLabel="ארכוב"
         variant="danger"
         isLoading={isArchiving}
         onCancel={() => setArchiveTargetId(null)}
