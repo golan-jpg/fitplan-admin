@@ -97,19 +97,13 @@ export type AnalyticsKpi = {
 export type AuditLogSeverity = "info" | "success" | "warning" | "danger";
 
 export type AuditLogEntityType =
-  | "exercise"
-  | "workout_plan"
-  | "nutrition_plan"
-  | "recipe"
-  | "user";
+  | "exercises"
+  | "workoutPlans"
+  | "nutritionPlans"
+  | "recipes"
+  | "users";
 
-export type AuditLogAction =
-  | "created"
-  | "updated"
-  | "archived"
-  | "restored"
-  | "status_changed"
-  | "flagged_at_risk";
+export type AuditLogAction = string;
 
 export type AuditLogEntry = {
   id: string;

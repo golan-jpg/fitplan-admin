@@ -130,11 +130,11 @@ export default function ExercisesPage() {
           addAuditLog({
             actorName: session.name,
             actorRole: session.role,
-            action: "updated",
-            entityType: "exercise",
+            action: "עריכת תרגיל",
+            entityType: "exercises",
             entityName: formState.name,
             entityId: editingExerciseId,
-            severity: "info",
+            severity: "success",
             description: `עודכן תרגיל: ${formState.name}.`,
           });
         }
@@ -145,8 +145,8 @@ export default function ExercisesPage() {
           addAuditLog({
             actorName: session.name,
             actorRole: session.role,
-            action: "created",
-            entityType: "exercise",
+            action: "הוספת תרגיל",
+            entityType: "exercises",
             entityName: formState.name,
             entityId: created.id,
             severity: "success",
@@ -170,11 +170,11 @@ export default function ExercisesPage() {
         addAuditLog({
           actorName: session.name,
           actorRole: session.role,
-          action: "archived",
-          entityType: "exercise",
+          action: "ארכוב תרגיל",
+          entityType: "exercises",
           entityName: targetExercise.name,
           entityId: archiveTargetId,
-          severity: "warning",
+          severity: "danger",
           description: `תרגיל הועבר לארכיון: ${targetExercise.name}.`,
         });
       }
@@ -226,8 +226,8 @@ export default function ExercisesPage() {
                       addAuditLog({
                         actorName: session.name,
                         actorRole: session.role,
-                        action: "restored",
-                        entityType: "exercise",
+                        action: "שחזור תרגיל",
+                        entityType: "exercises",
                         entityName: row.name,
                         entityId: row.id,
                         severity: "success",

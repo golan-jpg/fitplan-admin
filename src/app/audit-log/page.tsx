@@ -11,20 +11,11 @@ import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { AuditLogEntry, AuditLogEntityType } from "@/types";
 
 const entityTypeLabel: Record<AuditLogEntityType, string> = {
-  exercise: "תרגיל",
-  workout_plan: "תוכנית אימון",
-  nutrition_plan: "תוכנית תזונה",
-  recipe: "מתכון",
-  user: "משתמש",
-};
-
-const actionLabel: Record<AuditLogEntry["action"], string> = {
-  created: "יצירה",
-  updated: "עדכון",
-  archived: "ארכוב",
-  restored: "שחזור",
-  status_changed: "שינוי סטטוס",
-  flagged_at_risk: "סימון בסיכון",
+  exercises: "תרגילים",
+  workoutPlans: "תוכניות אימון",
+  nutritionPlans: "תוכניות תזונה",
+  recipes: "מתכונים",
+  users: "משתמשים",
 };
 
 const actorRoleLabel: Record<AuditLogEntry["actorRole"], string> = {
@@ -35,8 +26,8 @@ const actorRoleLabel: Record<AuditLogEntry["actorRole"], string> = {
 
 const ROLE_ENTITY_MAP: Record<"admin" | "coach" | "nutritionist", AuditLogEntityType[] | undefined> = {
   admin: undefined,
-  coach: ["exercise", "workout_plan", "user"],
-  nutritionist: ["nutrition_plan", "recipe", "user"],
+  coach: ["users", "exercises", "workoutPlans"],
+  nutritionist: ["users", "recipes", "nutritionPlans"],
 };
 
 function formatTimestamp(iso: string): string {
@@ -80,7 +71,7 @@ export default function AuditLogPage() {
 
   const availableEntityTypes = useMemo<AuditLogEntityType[]>(() => {
     if (roleFilter) return roleFilter;
-    return ["exercise", "workout_plan", "nutrition_plan", "recipe", "user"];
+    return ["exercises", "workoutPlans", "nutritionPlans", "recipes", "users"];
   }, [roleFilter]);
 
   const columns: DataTableColumn<AuditLogEntry>[] = [
@@ -105,7 +96,7 @@ export default function AuditLogPage() {
       key: "action",
       header: "פעולה",
       render: (row) => (
-        <span className="text-sm font-medium text-slate-700">{actionLabel[row.action]}</span>
+        <span className="text-sm font-medium text-slate-700">{row.action}</span>
       ),
     },
     {

@@ -11,6 +11,8 @@ import { PageTitle } from "@/components/ui/PageTitle";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
+import { useDemoAuth } from "@/context/DemoAuthContext";
+import { useAuditLogContext } from "@/context/AuditLogContext";
 import { useUsers } from "@/hooks/useUsers";
 import { User } from "@/types";
 
@@ -39,6 +41,12 @@ const planTypeLabel: Record<User["primaryPlanType"], string> = {
   nutrition: "תזונה",
 };
 
+const statusLabel: Record<User["status"], string> = {
+  active: "פעיל",
+  inactive: "לא פעיל",
+  at_risk: "בסיכון",
+};
+
 type UserFormState = {
   fullName: string;
   email: string;
@@ -56,6 +64,8 @@ const emptyForm: UserFormState = {
 };
 
 export default function UsersPage() {
+  const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const {
     users,
     isLoading: isUsersLoading,
@@ -132,10 +142,48 @@ export default function UsersPage() {
 
     setTimeout(async () => {
       if (editingUserId) {
-        await updateUser(editingUserId, formState);
+        const previousUser = users.find((user) => user.id === editingUserId);
+        const updated = await updateUser(editingUserId, formState);
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "עריכת משתמש",
+            entityType: "users",
+            entityName: formState.fullName,
+            entityId: editingUserId,
+            severity: "success",
+            description: `עודכן משתמש: ${formState.fullName}.`,
+          });
+
+          if (previousUser && previousUser.status !== formState.status) {
+            addAuditLog({
+              actorName: session.name,
+              actorRole: session.role,
+              action: "שינוי סטטוס משתמש",
+              entityType: "users",
+              entityName: formState.fullName,
+              entityId: editingUserId,
+              severity: "warning",
+              description: `סטטוס המשתמש "${formState.fullName}" שונה מ-${statusLabel[previousUser.status]} ל-${statusLabel[formState.status]}.`,
+            });
+          }
+        }
         setToast({ type: "success", message: "המשתמש עודכן בהצלחה." });
       } else {
-        await createUser(formState);
+        const created = await createUser(formState);
+        if (session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "הוספת משתמש",
+            entityType: "users",
+            entityName: formState.fullName,
+            entityId: created.id,
+            severity: "success",
+            description: `נוסף משתמש חדש: ${formState.fullName}.`,
+          });
+        }
         setToast({ type: "success", message: "המשתמש נוסף בהצלחה." });
       }
 
@@ -151,7 +199,33 @@ export default function UsersPage() {
 
     setIsSaving(true);
     setTimeout(async () => {
-      await updateUserStatus(pendingRiskUserId, "at_risk");
+      const targetUser = users.find((user) => user.id === pendingRiskUserId);
+      const updated = await updateUserStatus(pendingRiskUserId, "at_risk");
+      if (updated && session) {
+        addAuditLog({
+          actorName: session.name,
+          actorRole: session.role,
+          action: "סימון משתמש בסיכון",
+          entityType: "users",
+          entityName: updated.fullName,
+          entityId: pendingRiskUserId,
+          severity: "danger",
+          description: `המשתמש ${updated.fullName} סומן כבסיכון.`,
+        });
+
+        if (targetUser && targetUser.status !== "at_risk") {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "שינוי סטטוס משתמש",
+            entityType: "users",
+            entityName: updated.fullName,
+            entityId: pendingRiskUserId,
+            severity: "warning",
+            description: `סטטוס המשתמש "${updated.fullName}" שונה מ-${statusLabel[targetUser.status]} ל-${statusLabel.at_risk}.`,
+          });
+        }
+      }
       setPendingRiskUserId(null);
       setIsSaving(false);
       setToast({ type: "success", message: "המשתמש סומן כבסיכון." });

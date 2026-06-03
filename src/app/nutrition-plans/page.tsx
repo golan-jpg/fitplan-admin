@@ -12,6 +12,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
 import { useDemoAuth } from "@/context/DemoAuthContext";
+import { useAuditLogContext } from "@/context/AuditLogContext";
 import { NutritionPlan, PlanStatus } from "@/types";
 
 const statusTabs = [
@@ -64,6 +65,7 @@ const EMPTY_PLAN: NutritionPlanFormState = {
 
 export default function NutritionPlansPage() {
   const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const canEdit = session?.role === "admin" || session?.role === "nutritionist";
 
   const {
@@ -135,10 +137,48 @@ export default function NutritionPlansPage() {
     setIsSaving(true);
     setTimeout(async () => {
       if (editingPlanId) {
-        await updateNutritionPlan(editingPlanId, formState);
+        const previousPlan = nutritionPlans.find((plan) => plan.id === editingPlanId);
+        const updated = await updateNutritionPlan(editingPlanId, formState);
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "עריכת תכנית תזונה",
+            entityType: "nutritionPlans",
+            entityName: formState.title,
+            entityId: editingPlanId,
+            severity: "success",
+            description: `עודכנה תכנית תזונה: ${formState.title}.`,
+          });
+
+          if (previousPlan && previousPlan.status !== formState.status) {
+            addAuditLog({
+              actorName: session.name,
+              actorRole: session.role,
+              action: "שינוי סטטוס תכנית תזונה",
+              entityType: "nutritionPlans",
+              entityName: formState.title,
+              entityId: editingPlanId,
+              severity: "warning",
+              description: `סטטוס תכנית התזונה "${formState.title}" שונה מ-${statusLabel[previousPlan.status]} ל-${statusLabel[formState.status]}.`,
+            });
+          }
+        }
         setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” ×¢×•×“×›× ×” ×‘×”×¦×œ×—×”." });
       } else {
-        await createNutritionPlan(formState);
+        const created = await createNutritionPlan(formState);
+        if (session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "יצירת תכנית תזונה",
+            entityType: "nutritionPlans",
+            entityName: formState.title,
+            entityId: created.id,
+            severity: "success",
+            description: `נוצרה תכנית תזונה חדשה: ${formState.title}.`,
+          });
+        }
         setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” × ×•×¦×¨×” ×‘×”×¦×œ×—×”." });
       }
       setIsSaving(false);
@@ -149,8 +189,21 @@ export default function NutritionPlansPage() {
   function confirmArchive() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
+    const targetPlan = nutritionPlans.find((plan) => plan.id === archiveTargetId);
     setTimeout(async () => {
       await updateNutritionPlanStatus(archiveTargetId, "archived");
+      if (session && targetPlan) {
+        addAuditLog({
+          actorName: session.name,
+          actorRole: session.role,
+          action: "ארכוב תכנית תזונה",
+          entityType: "nutritionPlans",
+          entityName: targetPlan.title,
+          entityId: archiveTargetId,
+          severity: "danger",
+          description: `תכנית תזונה הועברה לארכיון: ${targetPlan.title}.`,
+        });
+      }
       setIsArchiving(false);
       setArchiveTargetId(null);
       setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”×ª×–×•× ×” ×”×•×¢×‘×¨×” ×œ××¨×›×™×•×Ÿ." });
@@ -198,9 +251,31 @@ export default function NutritionPlansPage() {
               <button
                 type="button"
                 onClick={() =>
-                  updateNutritionPlanStatus(row.id, "draft").then(() =>
-                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." })
-                  )
+                  updateNutritionPlanStatus(row.id, "draft").then(() => {
+                    if (session) {
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "שחזור תכנית תזונה",
+                        entityType: "nutritionPlans",
+                        entityName: row.title,
+                        entityId: row.id,
+                        severity: "success",
+                        description: `תכנית תזונה שוחזרה מארכיון: ${row.title}.`,
+                      });
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "שינוי סטטוס תכנית תזונה",
+                        entityType: "nutritionPlans",
+                        entityName: row.title,
+                        entityId: row.id,
+                        severity: "warning",
+                        description: `סטטוס תכנית התזונה "${row.title}" שונה מארכיון לטיוטה.`,
+                      });
+                    }
+                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." });
+                  })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >

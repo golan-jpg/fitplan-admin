@@ -10,6 +10,8 @@ import { PageTitle } from "@/components/ui/PageTitle";
 import { UserDetailsSkeleton } from "@/components/ui/Skeletons";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
+import { useAuditLogContext } from "@/context/AuditLogContext";
+import { useDemoAuth } from "@/context/DemoAuthContext";
 import { useNutritionPlans } from "@/hooks/useNutritionPlans";
 import { useProgressReports } from "@/hooks/useProgressReports";
 import { useUsers } from "@/hooks/useUsers";
@@ -34,9 +36,17 @@ const goalLabel = {
   maintenance: "שמירה על משקל",
 };
 
+const statusLabel = {
+  active: "פעיל",
+  inactive: "לא פעיל",
+  at_risk: "בסיכון",
+};
+
 type UserModalType = "edit" | "message" | "new_plan" | null;
 
 export default function UserDetailsPage() {
+  const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
   const {
@@ -107,7 +117,20 @@ export default function UserDetailsPage() {
     }
 
     runDemoSave(() => {
-      void updateUser(userId, { fullName: editForm.fullName, email: editForm.email });
+      void updateUser(userId, { fullName: editForm.fullName, email: editForm.email }).then((updated) => {
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "עריכת משתמש",
+            entityType: "users",
+            entityName: updated.fullName,
+            entityId: userId,
+            severity: "success",
+            description: `עודכנו פרטי משתמש: ${updated.fullName}.`,
+          });
+        }
+      });
       setModalType(null);
       setToast({ type: "success", message: "פרטי המשתמש עודכנו בהצלחה." });
     });
@@ -145,9 +168,36 @@ export default function UserDetailsPage() {
     }
 
     runDemoSave(() => {
+      const previousStatus = userState.status;
       void updateUser(userId, {
         status: "at_risk",
         adherenceScore: Math.min(userState.adherenceScore, 65),
+      }).then((updated) => {
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "סימון משתמש בסיכון",
+            entityType: "users",
+            entityName: updated.fullName,
+            entityId: userId,
+            severity: "danger",
+            description: `המשתמש ${updated.fullName} סומן כבסיכון.`,
+          });
+
+          if (previousStatus !== "at_risk") {
+            addAuditLog({
+              actorName: session.name,
+              actorRole: session.role,
+              action: "שינוי סטטוס משתמש",
+              entityType: "users",
+              entityName: updated.fullName,
+              entityId: userId,
+              severity: "warning",
+              description: `סטטוס המשתמש "${updated.fullName}" שונה מ-${statusLabel[previousStatus]} ל-${statusLabel.at_risk}.`,
+            });
+          }
+        }
       });
       setPendingRiskConfirm(false);
       setToast({ type: "success", message: "המשתמש סומן כמשתמש בסיכון." });

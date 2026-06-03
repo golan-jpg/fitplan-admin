@@ -12,6 +12,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
 import { useDemoAuth } from "@/context/DemoAuthContext";
+import { useAuditLogContext } from "@/context/AuditLogContext";
 import { PlanStatus, WorkoutPlan } from "@/types";
 
 const statusTabs = [
@@ -62,6 +63,7 @@ const EMPTY_PLAN: WorkoutPlanFormState = {
 
 export default function WorkoutPlansPage() {
   const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const canEdit = session?.role === "admin" || session?.role === "coach";
 
   const {
@@ -132,10 +134,48 @@ export default function WorkoutPlansPage() {
     setIsSaving(true);
     setTimeout(async () => {
       if (editingPlanId) {
-        await updateWorkoutPlan(editingPlanId, formState);
+        const previousPlan = workoutPlans.find((plan) => plan.id === editingPlanId);
+        const updated = await updateWorkoutPlan(editingPlanId, formState);
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "עריכת תכנית אימון",
+            entityType: "workoutPlans",
+            entityName: formState.title,
+            entityId: editingPlanId,
+            severity: "success",
+            description: `עודכנה תכנית אימון: ${formState.title}.`,
+          });
+
+          if (previousPlan && previousPlan.status !== formState.status) {
+            addAuditLog({
+              actorName: session.name,
+              actorRole: session.role,
+              action: "שינוי סטטוס תכנית אימון",
+              entityType: "workoutPlans",
+              entityName: formState.title,
+              entityId: editingPlanId,
+              severity: "warning",
+              description: `סטטוס תכנית האימון "${formState.title}" שונה מ-${statusLabel[previousPlan.status]} ל-${statusLabel[formState.status]}.`,
+            });
+          }
+        }
         setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ ×¢×•×“×›× ×” ×‘×”×¦×œ×—×”." });
       } else {
-        await createWorkoutPlan(formState);
+        const created = await createWorkoutPlan(formState);
+        if (session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "יצירת תכנית אימון",
+            entityType: "workoutPlans",
+            entityName: formState.title,
+            entityId: created.id,
+            severity: "success",
+            description: `נוצרה תכנית אימון חדשה: ${formState.title}.`,
+          });
+        }
         setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ × ×•×¦×¨×” ×‘×”×¦×œ×—×”." });
       }
       setIsSaving(false);
@@ -146,8 +186,21 @@ export default function WorkoutPlansPage() {
   function confirmArchive() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
+    const targetPlan = workoutPlans.find((plan) => plan.id === archiveTargetId);
     setTimeout(async () => {
       await updateWorkoutPlanStatus(archiveTargetId, "archived");
+      if (session && targetPlan) {
+        addAuditLog({
+          actorName: session.name,
+          actorRole: session.role,
+          action: "ארכוב תכנית אימון",
+          entityType: "workoutPlans",
+          entityName: targetPlan.title,
+          entityId: archiveTargetId,
+          severity: "danger",
+          description: `תכנית אימון הועברה לארכיון: ${targetPlan.title}.`,
+        });
+      }
       setIsArchiving(false);
       setArchiveTargetId(null);
       setToast({ type: "success", message: "×ª×•×›× ×™×ª ×”××™×ž×•×Ÿ ×”×•×¢×‘×¨×” ×œ××¨×›×™×•×Ÿ." });
@@ -194,9 +247,31 @@ export default function WorkoutPlansPage() {
               <button
                 type="button"
                 onClick={() =>
-                  updateWorkoutPlanStatus(row.id, "draft").then(() =>
-                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." })
-                  )
+                  updateWorkoutPlanStatus(row.id, "draft").then(() => {
+                    if (session) {
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "שחזור תכנית אימון",
+                        entityType: "workoutPlans",
+                        entityName: row.title,
+                        entityId: row.id,
+                        severity: "success",
+                        description: `תכנית אימון שוחזרה מארכיון: ${row.title}.`,
+                      });
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "שינוי סטטוס תכנית אימון",
+                        entityType: "workoutPlans",
+                        entityName: row.title,
+                        entityId: row.id,
+                        severity: "warning",
+                        description: `סטטוס תכנית האימון "${row.title}" שונה מארכיון לטיוטה.`,
+                      });
+                    }
+                    setToast({ type: "success", message: "×”×ª×•×›× ×™×ª ×”×•×—×–×¨×” ×œ×˜×™×•×˜×”." });
+                  })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >

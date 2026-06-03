@@ -12,6 +12,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
 import { useDemoAuth } from "@/context/DemoAuthContext";
+import { useAuditLogContext } from "@/context/AuditLogContext";
 import { Recipe } from "@/types";
 
 const mealTabs = [
@@ -53,6 +54,7 @@ const EMPTY_RECIPE: Omit<Recipe, "id"> = {
 
 export default function RecipesPage() {
   const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const canEdit = session?.role === "admin" || session?.role === "nutritionist";
 
   const {
@@ -131,10 +133,34 @@ export default function RecipesPage() {
     setIsSaving(true);
     setTimeout(async () => {
       if (editingRecipeId) {
-        await updateRecipe(editingRecipeId, formState);
+        const updated = await updateRecipe(editingRecipeId, formState);
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "עריכת מתכון",
+            entityType: "recipes",
+            entityName: formState.name,
+            entityId: editingRecipeId,
+            severity: "success",
+            description: `עודכן מתכון: ${formState.name}.`,
+          });
+        }
         setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×¢×•×“×›×Ÿ ×‘×”×¦×œ×—×”." });
       } else {
-        await createRecipe(formState);
+        const created = await createRecipe(formState);
+        if (session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "הוספת מתכון",
+            entityType: "recipes",
+            entityName: formState.name,
+            entityId: created.id,
+            severity: "success",
+            description: `נוסף מתכון חדש: ${formState.name}.`,
+          });
+        }
         setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ × ×•×¡×£ ×‘×”×¦×œ×—×”." });
       }
       setIsSaving(false);
@@ -145,8 +171,21 @@ export default function RecipesPage() {
   function confirmArchive() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
+    const targetRecipe = recipes.find((recipe) => recipe.id === archiveTargetId);
     setTimeout(async () => {
       await updateRecipe(archiveTargetId, { status: "inactive" });
+      if (session && targetRecipe) {
+        addAuditLog({
+          actorName: session.name,
+          actorRole: session.role,
+          action: "ארכוב מתכון",
+          entityType: "recipes",
+          entityName: targetRecipe.name,
+          entityId: archiveTargetId,
+          severity: "danger",
+          description: `מתכון הועבר לארכיון: ${targetRecipe.name}.`,
+        });
+      }
       setIsArchiving(false);
       setArchiveTargetId(null);
       setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×”×•×¢×‘×¨ ×œ××¨×›×™×•×Ÿ." });
@@ -209,9 +248,21 @@ export default function RecipesPage() {
               <button
                 type="button"
                 onClick={() =>
-                  updateRecipe(row.id, { status: "active" }).then(() =>
-                    setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×”×•×¤×¢×œ ×ž×—×“×©." })
-                  )
+                  updateRecipe(row.id, { status: "active" }).then(() => {
+                    if (session) {
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "שחזור מתכון",
+                        entityType: "recipes",
+                        entityName: row.name,
+                        entityId: row.id,
+                        severity: "success",
+                        description: `מתכון שוחזר מארכיון: ${row.name}.`,
+                      });
+                    }
+                    setToast({ type: "success", message: "×”×ž×ª×›×•×Ÿ ×”×•×¤×¢×œ ×ž×—×“×©." });
+                  })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >
