@@ -6,7 +6,11 @@ type StatusBadgeProps = {
     | "draft"
     | "archived"
     | "on_track"
-    | "needs_attention";
+    | "needs_attention"
+    | "info"
+    | "success"
+    | "warning"
+    | "danger";
 };
 
 const labelMap: Record<StatusBadgeProps["status"], string> = {
@@ -17,6 +21,10 @@ const labelMap: Record<StatusBadgeProps["status"], string> = {
   archived: "ארכיון",
   on_track: "במסלול",
   needs_attention: "דורש תשומת לב",
+  info: "מידע",
+  success: "הצלחה",
+  warning: "אזהרה",
+  danger: "חמור",
 };
 
 const classMap: Record<StatusBadgeProps["status"], string> = {
@@ -27,6 +35,10 @@ const classMap: Record<StatusBadgeProps["status"], string> = {
   archived: "bg-zinc-200 text-zinc-700",
   on_track: "bg-emerald-100 text-emerald-700",
   needs_attention: "bg-rose-100 text-rose-700",
+  info: "bg-blue-100 text-blue-700",
+  success: "bg-emerald-100 text-emerald-700",
+  warning: "bg-amber-100 text-amber-800",
+  danger: "bg-rose-100 text-rose-700",
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

@@ -93,3 +93,33 @@ export type AnalyticsKpi = {
   delta: string;
   trend: Trend;
 };
+
+export type AuditLogSeverity = "info" | "success" | "warning" | "danger";
+
+export type AuditLogEntityType =
+  | "exercise"
+  | "workout_plan"
+  | "nutrition_plan"
+  | "recipe"
+  | "user";
+
+export type AuditLogAction =
+  | "created"
+  | "updated"
+  | "archived"
+  | "restored"
+  | "status_changed"
+  | "flagged_at_risk";
+
+export type AuditLogEntry = {
+  id: string;
+  actorName: string;
+  actorRole: "admin" | "coach" | "nutritionist";
+  action: AuditLogAction;
+  entityType: AuditLogEntityType;
+  entityName: string;
+  entityId: string;
+  timestamp: string;
+  severity: AuditLogSeverity;
+  description: string;
+};

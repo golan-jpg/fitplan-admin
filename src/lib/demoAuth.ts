@@ -52,13 +52,14 @@ export const navItems: NavItem[] = [
   { href: "/recipes", label: "מאגר ארוחות ומתכונים", roles: ["admin", "nutritionist"] },
   { href: "/progress", label: "מעקב התקדמות", roles: ["admin", "coach", "nutritionist"] },
   { href: "/analytics", label: "אנליטיקות", roles: ["admin"] },
+  { href: "/audit-log", label: "יומן פעולות", roles: ["admin", "coach", "nutritionist"] },
   { href: "/settings", label: "הגדרות", roles: ["admin"] },
 ];
 
 const roleAllowedPrefixes: Record<DemoRole, string[]> = {
-  admin: ["/", "/users", "/workout-plans", "/exercises", "/nutrition-plans", "/recipes", "/progress", "/analytics", "/settings"],
-  coach: ["/", "/users", "/workout-plans", "/exercises", "/progress"],
-  nutritionist: ["/", "/users", "/nutrition-plans", "/recipes", "/progress"],
+  admin: ["/", "/users", "/workout-plans", "/exercises", "/nutrition-plans", "/recipes", "/progress", "/analytics", "/audit-log", "/settings"],
+  coach: ["/", "/users", "/workout-plans", "/exercises", "/progress", "/audit-log"],
+  nutritionist: ["/", "/users", "/nutrition-plans", "/recipes", "/progress", "/audit-log"],
 };
 
 const publicPaths = ["/login"];

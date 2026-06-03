@@ -12,6 +12,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { useDemoAuth } from "@/context/DemoAuthContext";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ToastMessage } from "@/components/ui/ToastMessage";
+import { useAuditLogContext } from "@/context/AuditLogContext";
 import { Exercise } from "@/types";
 
 const statusTabs = [
@@ -35,6 +36,7 @@ const levelLabel: Record<Exercise["level"], string> = {
 
 export default function ExercisesPage() {
   const { session } = useDemoAuth();
+  const { addAuditLog } = useAuditLogContext();
   const canEdit = session?.role === "admin" || session?.role === "coach";
 
   const {
@@ -123,10 +125,34 @@ export default function ExercisesPage() {
     setIsSaving(true);
     setTimeout(async () => {
       if (editingExerciseId) {
-        await updateExercise(editingExerciseId, formState);
+        const updated = await updateExercise(editingExerciseId, formState);
+        if (updated && session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "updated",
+            entityType: "exercise",
+            entityName: formState.name,
+            entityId: editingExerciseId,
+            severity: "info",
+            description: `עודכן תרגיל: ${formState.name}.`,
+          });
+        }
         setToast({ type: "success", message: "התרגיל עודכן בהצלחה." });
       } else {
-        await createExercise(formState);
+        const created = await createExercise(formState);
+        if (session) {
+          addAuditLog({
+            actorName: session.name,
+            actorRole: session.role,
+            action: "created",
+            entityType: "exercise",
+            entityName: formState.name,
+            entityId: created.id,
+            severity: "success",
+            description: `נוסף תרגיל חדש: ${formState.name}.`,
+          });
+        }
         setToast({ type: "success", message: "התרגיל נוסף בהצלחה." });
       }
       setIsSaving(false);
@@ -137,8 +163,21 @@ export default function ExercisesPage() {
   function confirmArchive() {
     if (!archiveTargetId) return;
     setIsArchiving(true);
+    const targetExercise = exercises.find((e) => e.id === archiveTargetId);
     setTimeout(async () => {
       await updateExercise(archiveTargetId, { status: "inactive" });
+      if (session && targetExercise) {
+        addAuditLog({
+          actorName: session.name,
+          actorRole: session.role,
+          action: "archived",
+          entityType: "exercise",
+          entityName: targetExercise.name,
+          entityId: archiveTargetId,
+          severity: "warning",
+          description: `תרגיל הועבר לארכיון: ${targetExercise.name}.`,
+        });
+      }
       setIsArchiving(false);
       setArchiveTargetId(null);
       setToast({ type: "success", message: "התרגיל הועבר לארכיון." });
@@ -182,9 +221,21 @@ export default function ExercisesPage() {
               <button
                 type="button"
                 onClick={() =>
-                  updateExercise(row.id, { status: "active" }).then(() =>
-                    setToast({ type: "success", message: "התרגיל הופעל מחדש." })
-                  )
+                  updateExercise(row.id, { status: "active" }).then(() => {
+                    if (session) {
+                      addAuditLog({
+                        actorName: session.name,
+                        actorRole: session.role,
+                        action: "restored",
+                        entityType: "exercise",
+                        entityName: row.name,
+                        entityId: row.id,
+                        severity: "success",
+                        description: `תרגיל שוחזר מארכיון: ${row.name}.`,
+                      });
+                    }
+                    setToast({ type: "success", message: "התרגיל הופעל מחדש." });
+                  })
                 }
                 className="rounded-lg border border-emerald-200 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
               >
