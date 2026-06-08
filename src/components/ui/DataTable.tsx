@@ -57,9 +57,9 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="overflow-x-auto">
-        <table className="min-w-[920px] divide-y divide-slate-200 text-right">
+    <div className="w-full max-w-full overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="w-full">
+        <table className="min-w-[1200px] w-full divide-y divide-slate-200 text-right">
           <thead className="sticky top-0 z-10 bg-slate-50">
             <tr>
               {columns.map((column) => (

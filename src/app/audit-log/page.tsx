@@ -122,13 +122,15 @@ export default function AuditLogPage() {
       key: "description",
       header: "תיאור",
       render: (row) => (
-        <p className="max-w-xs text-xs text-slate-600">{row.description}</p>
+        <p className="max-w-[320px] truncate text-xs text-slate-600" title={row.description}>
+          {row.description}
+        </p>
       ),
     },
   ];
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <Breadcrumbs items={[{ label: "דשבורד", href: "/" }, { label: "יומן פעולות" }]} />
       <PageTitle
         title="יומן פעולות"
@@ -137,7 +139,8 @@ export default function AuditLogPage() {
 
       {/* פילטרים */}
       <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
-        <div className="grid gap-3 md:grid-cols-[1fr_auto_auto_auto_auto]">
+        <div className="w-full overflow-x-auto">
+          <div className="flex min-w-0 flex-wrap gap-3">
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -193,6 +196,7 @@ export default function AuditLogPage() {
               ניקוי סינון
             </button>
           )}
+          </div>
         </div>
       </div>
 
